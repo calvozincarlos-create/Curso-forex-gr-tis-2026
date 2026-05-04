@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day Trading — Do Zero ao Consistente</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--gold:#C8920A;--gold2:#E5A800;--gold-bg:rgba(200,146,10,0.08);--gold-border:rgba(200,146,10,0.18);
+--green:#1a7a3c;--green-bg:rgba(26,122,60,0.08);
+--red:#b32b2b;--red-bg:rgba(179,43,43,0.08);
+--blue:#1a5fa5;--blue-bg:rgba(26,95,165,0.08);
+--surface:#fff;--surface2:#f7f6f3;--surface3:#f0efe9;
+--txt:#1a1a1a;--txt2:#555;--txt3:#999;
+--border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+--danger-bg:rgba(179,43,43,0.06);--danger-border:rgba(179,43,43,0.25);--danger-txt:#8a1f1f;
+--info-bg:rgba(26,95,165,0.07);--info-border:rgba(26,95,165,0.2);--info-txt:#1a5fa5;
+--success-bg:rgba(26,122,60,0.07);--success-border:rgba(26,122,60,0.2);--success-txt:#1a7a3c;
+}
+@media(prefers-color-scheme:dark){
+:root{
+--surface:#111;--surface2:#1a1a1a;--surface3:#0d0d0d;
+--txt:#f0ede6;--txt2:#888;--txt3:#555;
+--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+--danger-bg:rgba(179,43,43,0.1);--danger-border:rgba(179,43,43,0.3);--danger-txt:#d08080;
+--info-bg:rgba(26,95,165,0.1);--info-border:rgba(26,95,165,0.25);--info-txt:#7ab0e0;
+--success-bg:rgba(26,122,60,0.1);--success-border:rgba(26,122,60,0.25);--success-txt:#6ec490;
+}}
+body{background:var(--surface3);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--txt)}
+
+.app{background:var(--surface3);border-radius:16px;overflow:hidden;border:0.5px solid var(--border);max-width:600px;margin:0 auto}
+
+.header{background:var(--surface);border-bottom:0.5px solid var(--border);padding:16px}
+.h-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-bg);border:0.5px solid var(--gold-border);color:var(--gold);font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:10px;letter-spacing:.06em}
+.h-title{font-size:18px;font-weight:500;color:var(--txt);line-height:1.2;margin-bottom:4px}
+.h-sub{font-size:12px;color:var(--txt2);line-height:1.5;margin-bottom:14px}
+.h-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.hstat{background:var(--surface2);border-radius:8px;padding:8px 6px;text-align:center}
+.hstat-n{font-size:15px;font-weight:500;color:var(--gold)}
+.hstat-l{font-size:9px;color:var(--txt3);margin-top:1px}
+
+.warn{background:var(--danger-bg);border-left:2px solid var(--danger-border);padding:10px 14px;margin:12px 16px;border-radius:0 8px 8px 0}
+.warn-t{font-size:10px;font-weight:500;color:var(--danger-txt);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.warn-b{font-size:11px;color:var(--danger-txt);line-height:1.5;opacity:.9}
+
+.mod-nav{padding:12px 16px 0;background:var(--surface);border-bottom:0.5px solid var(--border)}
+.mod-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mod-tabs::-webkit-scrollbar{display:none}
+.mtab{flex-shrink:0;padding:8px 14px;font-size:12px;font-weight:500;color:var(--txt2);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.mtab.on{color:var(--gold);border-bottom-color:var(--gold)}
+
+.mod-body{display:none;padding:16px}
+.mod-body.on{display:block}
+
+.mod-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:0.5px solid var(--border)}
+.mod-num{font-size:28px;font-weight:500;color:var(--gold-border);line-height:1;min-width:36px}
+.mod-title{font-size:15px;font-weight:500;color:var(--txt);margin-bottom:3px}
+.mod-desc{font-size:11px;color:var(--txt2);line-height:1.5}
+.mod-count{display:inline-block;background:var(--gold-bg);color:var(--gold);font-size:10px;padding:2px 8px;border-radius:10px;margin-top:5px;font-weight:500}
+
+.lesson{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.lesson.done{border-color:var(--success-border)}
+.lesson.active-l{border-color:var(--gold-border)}
+
+.l-top{display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer;touch-action:manipulation;user-select:none}
+.l-num{width:26px;height:26px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--txt2);flex-shrink:0}
+.lesson.done .l-num{background:var(--success-bg);color:var(--success-txt)}
+.l-info{flex:1;min-width:0}
+.l-title{font-size:13px;font-weight:500;color:var(--txt);line-height:1.3}
+.l-meta{font-size:10px;color:var(--txt3);margin-top:2px}
+.l-tag{font-size:9px;padding:2px 7px;border-radius:10px;font-weight:500;white-space:nowrap;flex-shrink:0}
+.tag-ini{background:var(--blue-bg);color:var(--blue)}
+.tag-med{background:var(--gold-bg);color:var(--gold)}
+.tag-adv{background:var(--green-bg);color:var(--green)}
+.tag-crit{background:var(--red-bg);color:var(--red)}
+.l-arr{font-size:10px;color:var(--txt3);flex-shrink:0;transition:transform .2s}
+.lesson.open .l-arr{transform:rotate(180deg)}
+
+.l-body{display:none;border-top:0.5px solid var(--border)}
+.lesson.open .l-body{display:block}
+
+.l-section{padding:12px}
+.l-section+.l-section{border-top:0.5px solid var(--border)}
+
+.sec-label{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+
+.l-text{font-size:12px;color:var(--txt2);line-height:1.65}
+.l-text strong{color:var(--txt);font-weight:500}
+
+.kp{display:flex;gap:7px;align-items:flex-start;padding:7px 10px;background:var(--surface2);border-radius:7px;margin:5px 0;font-size:12px;color:var(--txt2);line-height:1.55}
+.kp strong{color:var(--txt);font-weight:500}
+.kp-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:7px}
+
+.chart-box{background:var(--surface2);border-radius:8px;padding:12px;margin:8px 0}
+.chart-label{font-size:10px;color:var(--txt3);margin-bottom:8px;text-align:center}
+
+.candles{display:flex;gap:4px;align-items:flex-end;height:60px;padding:0 4px}
+.c-wrap{display:flex;flex-direction:column;align-items:center;flex:1}
+.c-wick-t,.c-wick-b{width:1.5px;border-radius:1px;background:var(--txt3)}
+.c-body{width:100%;border-radius:2px}
+.c-bull .c-body{background:#1a7a3c}
+.c-bear .c-body{background:#b32b2b}
+
+.challenge{background:var(--gold-bg);border:0.5px solid var(--gold-border);border-radius:8px;padding:10px 12px;margin-top:8px}
+.ch-label{font-size:10px;font-weight:500;color:var(--gold);margin-bottom:5px}
+.ch-text{font-size:12px;color:var(--txt2);line-height:1.55}
+
+.tip-box{background:var(--info-bg);border:0.5px solid var(--info-border);border-radius:8px;padding:10px 12px;margin-top:8px}
+.tip-label{font-size:10px;font-weight:500;color:var(--info-txt);margin-bottom:5px}
+.tip-text{font-size:12px;color:var(--info-txt);line-height:1.55;opacity:.9}
+
+.mark-done-btn{width:100%;padding:10px;border:0.5px solid var(--success-border);background:var(--success-bg);color:var(--success-txt);border-radius:0;font-size:12px;font-weight:500;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.lesson.done .mark-done-btn{opacity:.5;cursor:default}
+
+.progress-bar{height:3px;background:var(--surface2);border-radius:0}
+.pb-fill{height:100%;background:var(--gold);border-radius:0;transition:width .4s ease}
+
+.ask-btn{display:block;width:100%;padding:12px;border:0.5px solid var(--border2);background:var(--surface);color:var(--txt);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;text-align:center;margin-top:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.ask-btn:active{background:var(--surface2)}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+<div class="header">
+  <div class="h-badge">CURSO COMPLETO</div>
+  <div class="h-title">Day Trading — Do Zero ao Consistente</div>
+  <div class="h-sub">40+ aulas estruturadas. Aprenda com processo real, sem promessas falsas.</div>
+  <div class="h-stats">
+    <div class="hstat"><div class="hstat-n">9</div><div class="hstat-l">Módulos</div></div>
+    <div class="hstat"><div class="hstat-n">43</div><div class="hstat-l">Aulas</div></div>
+    <div class="hstat"><div class="hstat-n" id="done-count">0</div><div class="hstat-l">Concluídas</div></div>
+    <div class="hstat"><div class="hstat-n" id="pct-count">0%</div><div class="hstat-l">Progresso</div></div>
+  </div>
+</div>
+
+<div class="progress-bar"><div class="pb-fill" id="pb" style="width:0%"></div></div>
+
+<div class="warn">
+  <div class="warn-t">⚠ Aviso importante</div>
+  <div class="warn-b">Trading envolve risco real de perda de capital. Este curso ensina processo e disciplina — não garante lucros. Consistência leva tempo.</div>
+</div>
+
+<div class="mod-nav">
+  <div class="mod-tabs" id="mod-tabs">
+    <button class="mtab on" onclick="sw(0)">M1 Intro</button>
+    <button class="mtab" onclick="sw(1)">M2 Candles</button>
+    <button class="mtab" onclick="sw(2)">M3 Estrutura</button>
+    <button class="mtab" onclick="sw(3)">M4 S&amp;R</button>
+    <button class="mtab" onclick="sw(4)">M5 Liquidez</button>
+    <button class="mtab" onclick="sw(5)">M6 Entradas</button>
+    <button class="mtab" onclick="sw(6)">M7 Risco</button>
+    <button class="mtab" onclick="sw(7)">M8 Psico</button>
+    <button class="mtab" onclick="sw(8)">M9 Prática</button>
+  </div>
+</div>
+
+<!-- M1 -->
+<div class="mod-body on" id="mb0">
+<div class="mod-head">
+  <div class="mod-num">01</div>
+  <div class="mod-info">
+    <div class="mod-title">Introdução ao Trading</div>
+    <div class="mod-desc">Base conceitual. Entenda o mercado antes de tocar num gráfico.</div>
+    <span class="mod-count">5 aulas</span>
+  </div>
+</div>
+
+<div class="lesson" id="l0">
+  <div class="l-top" onclick="tgl('l0')">
+    <div class="l-num">1</div>
+    <div class="l-info"><div class="l-title">O que é trading?</div><div class="l-meta">5 min · Aula 1</div></div>
+    <span class="l-tag tag-ini">Iniciante</span>
+    <span class="l-arr">▼</span>
+  </div>
+  <div class="l-body">
+    <div class="l-section">
+      <div class="sec-label">Introdução</div>
+      <div class="l-text">Trading é a compra e venda de ativos financeiros com o objetivo de lucrar com as variações de preço. Diferente de investir (longo prazo), trading foca em movimentos de curto prazo.</div>
+    </div>
+    <div class="l-section">
+      <div class="sec-label">Conceitos-chave</div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Compra (Buy/Long):</strong> você aposta que o preço vai subir.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Venda (Sell/Short):</strong> você aposta que o preço vai cair. É possível lucrar na baixa.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Lucro = diferença</strong> entre o preço de entrada e saída, multiplicada pelo tamanho da posição.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Risco:</strong> se o preço vai contra você, você perde. Por isso a gestão de risco é fundamental.</div></div>
+    </div>
+    <div class="l-section">
+      <div class="sec-label">Exemplo visual</div>
+      <div class="chart-box">
+        <div class="chart-label">Compra em $100 → Venda em $110 = +$10 de lucro</div>
+        <div class="candles">
+          <div class="c-wrap"><div class="c-wick-t" style="height:4px"></div><div class="c-body c-bull" style="height:18px"></div><div class="c-wick-b" style="height:3px"></div></div>
+          <div class="c-wrap"><div class="c-wick-t" style="height:5px"></div><div class="c-body c-bear" style="height:10px"></div><div class="c-wick-b" style="height:4px"></div></div>
+          <div class="c-wrap"><div class="c-wick-t" style="height:3px"></div><div class="c-body c-bull" style="height:22px"></div><div class="c-wick-b" style="height:5px"></div></div>
+          <div class="c-wrap"><div class="c-wick-t" style="height:6px"></div><div class="c-body c-bull" style="height:28px"></div><div class="c-wick-b" style="height:3px"></div></div>
+          <div class="c-wrap"><div class="c-wick-t" style="height:4px"></div><div class="c-body c-bear" style="height:12px"></div><div class="c-wick-b" style="height:6px"></div></div>
+          <div class="c-wrap"><div class="c-wick-t" style="height:8px"></div><div class="c-body c-bull" style="height:32px"></div><div class="c-wick-b" style="height:4px"></div></div>
+          <div class="c-wrap"><div class="c-wick-t" style="height:5px"></div><div class="c-body c-bull" style="height:38px"></div><div class="c-wick-b" style="height:3px"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="l-section">
+      <div class="tip-box"><div class="tip-label">Dica prática</div><div class="tip-text">Antes de operar, sempre pergunte: "Qual é o meu risco máximo nesta operação?" Se não souber responder, não entre.</div></div>
+      <div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Pesquise o preço atual do XAUUSD (ouro). Se você comprasse agora e vendesse amanhã, qual seria seu lucro ou perda com 0.01 lote?</div></div>
+    </div>
+    <button class="mark-done-btn" onclick="markDone('l0')">Marcar como concluída</button>
+  </div>
+</div>
+
+<div class="lesson" id="l1">
+  <div class="l-top" onclick="tgl('l1')">
+    <div class="l-num">2</div>
+    <div class="l-info"><div class="l-title">Como o mercado funciona</div><div class="l-meta">8 min · Aula 2</div></div>
+    <span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span>
+  </div>
+  <div class="l-body">
+    <div class="l-section">
+      <div class="sec-label">Introdução</div>
+      <div class="l-text">O mercado é movido por oferta e demanda. Quando há mais compradores que vendedores, o preço sobe. Quando há mais vendedores, o preço cai.</div>
+    </div>
+    <div class="l-section">
+      <div class="sec-label">Como funciona</div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Livro de ordens (Order Book):</strong> todas as ordens de compra e venda pendentes ficam registradas.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Market Order:</strong> executa imediatamente ao preço atual. Mais rápido, mas pode ter slippage.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Limit Order:</strong> define um preço específico para entrar. Executa só quando o mercado atingir esse preço.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Bid/Ask Spread:</strong> diferença entre preço de venda (bid) e compra (ask). Esse é o custo da operação.</div></div>
+    </div>
+    <div class="l-section">
+      <div class="tip-box"><div class="tip-label">Dica prática</div><div class="tip-text">Para iniciantes, prefira limit orders. Você controla o preço de entrada e evita surpresas com slippage.</div></div>
+      <div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Abra uma plataforma demo (MetaTrader, TradingView) e observe o bid e ask do EUR/USD. Quanto é o spread?</div></div>
+    </div>
+    <button class="mark-done-btn" onclick="markDone('l1')">Marcar como concluída</button>
+  </div>
+</div>
+
+<div class="lesson" id="l2">
+  <div class="l-top" onclick="tgl('l2')">
+    <div class="l-num">3</div>
+    <div class="l-info"><div class="l-title">Tipos de mercado (Forex, índices, ouro)</div><div class="l-meta">10 min · Aula 3</div></div>
+    <span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span>
+  </div>
+  <div class="l-body">
+    <div class="l-section">
+      <div class="sec-label">Os principais mercados</div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Forex:</strong> pares de moedas (EUR/USD, GBP/JPY). Opera 24h/5 dias. Spreads baixos. Ideal para iniciantes.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Índices:</strong> S&amp;P500, NASDAQ, DAX. Refletem a economia de países. Alta correlação com notícias.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Ouro (XAUUSD):</strong> ativo refúgio. Alta volatilidade e movimentos claros. Muito usado por day traders.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>CFDs:</strong> permite operar na alta E na baixa sem possuir o ativo. Usa alavancagem.</div></div>
+    </div>
+    <div class="l-section">
+      <div class="tip-box"><div class="tip-label">Dica prática</div><div class="tip-text">Comece com 1 único ativo. Aprenda seus padrões, horários de maior volatilidade e comportamento.</div></div>
+      <div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Escolha UM ativo (sugestão: XAUUSD ou EUR/USD) e observe o gráfico por 3 dias seguidos sem operar. Anote o que percebe nos movimentos.</div></div>
+    </div>
+    <button class="mark-done-btn" onclick="markDone('l2')">Marcar como concluída</button>
+  </div>
+</div>
+
+<div class="lesson" id="l3">
+  <div class="l-top" onclick="tgl('l3')">
+    <div class="l-num">4</div>
+    <div class="l-info"><div class="l-title">O que é day trading</div><div class="l-meta">8 min · Aula 4</div></div>
+    <span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span>
+  </div>
+  <div class="l-body">
+    <div class="l-section">
+      <div class="sec-label">Definição</div>
+      <div class="l-text">Day trading é a prática de abrir e fechar operações no mesmo dia. Nenhuma posição é mantida overnight. O objetivo é capturar movimentos de preço intradiários.</div>
+    </div>
+    <div class="l-section">
+      <div class="sec-label">Características</div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Curto prazo:</strong> operações de segundos a horas. Timeframes usados: M1, M5, M15.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Muitas oportunidades:</strong> em 1 dia há dezenas de sinais. O desafio é selecionar apenas os melhores.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Custo de spread:</strong> mais operações = mais spread pago. Qualidade &gt; quantidade.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Exige disciplina:</strong> sem regras claras, o day trading destrói contas rapidamente.</div></div>
+    </div>
+    <div class="l-section">
+      <div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Responda honestamente: você tem disciplina para seguir regras mesmo sob pressão emocional? Escreva 3 regras que você seguiria em todo trade.</div></div>
+    </div>
+    <button class="mark-done-btn" onclick="markDone('l3')">Marcar como concluída</button>
+  </div>
+</div>
+
+<div class="lesson" id="l4">
+  <div class="l-top" onclick="tgl('l4')">
+    <div class="l-num">5</div>
+    <div class="l-info"><div class="l-title">Mentalidade correta para começar</div><div class="l-meta">12 min · Aula 5</div></div>
+    <span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span>
+  </div>
+  <div class="l-body">
+    <div class="l-section">
+      <div class="sec-label">A mentalidade certa</div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Trading é uma habilidade,</strong> não um esquema rápido. Leva 1 a 3 anos para desenvolver consistência real.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Perda faz parte:</strong> até os melhores traders perdem 40-50% das operações. O que importa é a relação risco/retorno.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Foque no processo,</strong> não no dinheiro. Seguir seu plano corretamente é o único indicador de sucesso no curto prazo.</div></div>
+      <div class="kp"><div class="kp-dot"></div><div><strong>Capital de risco:</strong> nunca opere com dinheiro que você precisa. Use apenas o que pode perder completamente.</div></div>
+    </div>
+    <div class="l-section">
+      <div class="tip-box"><div class="tip-label">Dica prática</div><div class="tip-text">Defina sua meta como "seguir meu plano em 90% das operações" — não como "ganhar X por mês".</div></div>
+      <div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Escreva seu "porquê" do trading. Por que você quer aprender? Guarde esse texto — ele vai te ancorar nos momentos difíceis.</div></div>
+    </div>
+    <button class="mark-done-btn" onclick="markDone('l4')">Marcar como concluída</button>
+  </div>
+</div>
+<button class="ask-btn" onclick="alert('Abra este site no Claude.ai para usar esta função.')">Fazer quiz do módulo 1 ↗</button>
+</div>
+
+<!-- M2 -->
+<div class="mod-body" id="mb1">
+<div class="mod-head">
+  <div class="mod-num">02</div>
+  <div class="mod-info">
+    <div class="mod-title">Leitura de Gráficos e Candles</div>
+    <div class="mod-desc">Aprenda a linguagem visual do mercado.</div>
+    <span class="mod-count">6 aulas</span>
+  </div>
+</div>
+<div class="lesson" id="l5"><div class="l-top" onclick="tgl('l5')"><div class="l-num">6</div><div class="l-info"><div class="l-title">O que são candles (velas)?</div><div class="l-meta">8 min · Aula 6</div></div><span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="sec-label">O candlestick</div><div class="l-text">Cada vela representa o preço de um ativo em um período de tempo. Ela contém 4 informações: abertura, fechamento, máxima e mínima.</div></div>
+  <div class="l-section"><div class="sec-label">Exemplo visual</div>
+    <div class="chart-box"><div class="chart-label">Vela Bullish (alta) vs Bearish (baixa)</div>
+      <div style="display:flex;gap:24px;justify-content:center;align-items:flex-end;padding:8px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:2px;height:14px;background:#1a7a3c;border-radius:1px"></div><div style="width:20px;height:40px;background:#1a7a3c;border-radius:2px"></div><div style="width:2px;height:8px;background:#1a7a3c;border-radius:1px"></div><div style="font-size:10px;color:#1a7a3c;margin-top:4px">Bullish</div><div style="font-size:9px;color:var(--txt3)">Abriu baixo,</div><div style="font-size:9px;color:var(--txt3)">fechou alto</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:9px;color:var(--txt3);margin-bottom:2px">← Máxima (High)</div><div style="font-size:9px;color:var(--txt3)">← Corpo (Body)</div><div style="font-size:9px;color:var(--txt3)">← Open / Close</div><div style="font-size:9px;color:var(--txt3)">← Mínima (Low)</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:2px;height:8px;background:#b32b2b;border-radius:1px"></div><div style="width:20px;height:40px;background:#b32b2b;border-radius:2px"></div><div style="width:2px;height:14px;background:#b32b2b;border-radius:1px"></div><div style="font-size:10px;color:#b32b2b;margin-top:4px">Bearish</div><div style="font-size:9px;color:var(--txt3)">Abriu alto,</div><div style="font-size:9px;color:var(--txt3)">fechou baixo</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Sombra superior:</strong> máxima atingida no período.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Sombra inferior:</strong> mínima atingida no período.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Corpo longo:</strong> forte movimento direcional.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Sombra longa:</strong> rejeição de preço — o mercado tentou ir mais longe mas foi rejeitado.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Abra o gráfico do EUR/USD no M5. Identifique 3 velas bullish e 3 bearish. Para cada uma, tente identificar se a sombra indica rejeição de preço.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l5')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l6"><div class="l-top" onclick="tgl('l6')"><div class="l-num">7</div><div class="l-info"><div class="l-title">Tipos de candles importantes</div><div class="l-meta">12 min · Aula 7</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="sec-label">Padrões essenciais</div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Doji:</strong> abertura e fechamento quase iguais. Indecisão do mercado.</div></div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Hammer / Pin Bar:</strong> sombra inferior longa. Rejeição de preços baixos — possível reversão de alta.</div></div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Shooting Star:</strong> sombra superior longa. Rejeição de preços altos — possível reversão de baixa.</div></div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Engolfo (Engulfing):</strong> vela grande "engolfa" a anterior. Sinal forte de reversão.</div></div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Morning Star / Evening Star:</strong> padrões de 3 velas. Reversão de alta ou baixa confirmada.</div></div></div>
+  <div class="l-section"><div class="tip-box"><div class="tip-label">Dica prática</div><div class="tip-text">Um padrão de vela isolado vale pouco. O mesmo padrão em uma zona de suporte/resistência forte vale muito. Contexto é tudo.</div></div>
+  <div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No gráfico M15 do XAUUSD, encontre um Hammer ou Pin Bar que apareceu em uma zona de suporte. O preço subiu depois?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l6')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l7"><div class="l-top" onclick="tgl('l7')"><div class="l-num">8</div><div class="l-info"><div class="l-title">Timeframes — M1, M5, M15 e mais</div><div class="l-meta">10 min · Aula 8</div></div><span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Timeframe (TF) é o período que cada vela representa. M1 = 1 minuto por vela. H4 = 4 horas por vela. Cada TF tem um propósito diferente.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>M1 / M5:</strong> execução. Entradas precisas. Muito ruído — não use para análise de tendência.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>M15 / M30:</strong> identificação de setup. Zonas de entrada e confirmação de padrões.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>H1 / H4:</strong> tendência de médio prazo. Contexto principal do day trader.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>D1 (diário):</strong> tendência macro. Nunca opere contra a tendência do D1.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Top-down analysis:</strong> analise do maior para o menor. D1 → H4 → H1 → M15 → M5 para executar.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Abra EUR/USD nos TFs D1, H4, H1 e M15. O que cada um mostra de diferente? Escreva 1 frase descrevendo a tendência em cada timeframe.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l7')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l8"><div class="l-top" onclick="tgl('l8')"><div class="l-num">9</div><div class="l-info"><div class="l-title">Como ler o gráfico corretamente</div><div class="l-meta">15 min · Aula 9</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Passo 1 — Limpe o gráfico:</strong> remova indicadores desnecessários. Comece com price action.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Passo 2 — Identifique a tendência:</strong> HH/HL (alta), LH/LL (baixa) ou topos/fundos iguais (lateral)?</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Passo 3 — Marque os níveis:</strong> onde o preço reagiu antes? Esses são seus suportes e resistências.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Passo 4 — Contexto atual:</strong> onde o preço está em relação aos níveis?</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Passo 5 — Aguarde o setup:</strong> se não há oportunidade clara, não force.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Abra o XAUUSD no H1 e siga os 5 passos desta aula. Escreva sua análise completa como se fosse explicar para alguém.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l8')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l9"><div class="l-top" onclick="tgl('l9')"><div class="l-num">10</div><div class="l-info"><div class="l-title">Erros comuns de iniciantes</div><div class="l-meta">10 min · Aula 10</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Usar muitos indicadores:</strong> o gráfico fica confuso. Menos é mais.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Operar em todos os TFs:</strong> foco em 2 TFs máximo (análise + execução).</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Ignorar o contexto macro:</strong> comprar quando o D1 está em downtrend é nadar contra a corrente.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Não ter paciência:</strong> forçar trades quando não há setup = perda desnecessária.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Qual desses erros você já cometeu ou sente que cometeria? Crie uma regra pessoal para evitá-lo.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l9')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l10"><div class="l-top" onclick="tgl('l10')"><div class="l-num">11</div><div class="l-info"><div class="l-title">Primeira análise simples</div><div class="l-meta">15 min · Aula 11</div></div><span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Esta aula é 100% prática. Você vai fazer sua primeira análise completa passo a passo, com o objetivo de identificar se existe uma oportunidade de trade — sem entrar ainda.</div></div>
+  <div class="l-section"><div class="sec-label">Template de análise</div>
+  <div class="kp"><div class="kp-dot"></div><div>Ativo: ___ | Data: ___ | Hora: ___</div></div>
+  <div class="kp"><div class="kp-dot"></div><div>Tendência D1: Alta / Baixa / Lateral</div></div>
+  <div class="kp"><div class="kp-dot"></div><div>Tendência H4: Alta / Baixa / Lateral</div></div>
+  <div class="kp"><div class="kp-dot"></div><div>Zona de interesse no H1: ___</div></div>
+  <div class="kp"><div class="kp-dot"></div><div>Existe setup? Sim / Não</div></div>
+  <div class="kp"><div class="kp-dot"></div><div>Direção esperada: Compra / Venda</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Preencha o template acima para o XAUUSD hoje. Guarde a análise e veja amanhã o que aconteceu com o preço. Sem operar — apenas observar.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l10')">Marcar como concluída</button></div>
+</div>
+</div>
+
+<!-- M3 -->
+<div class="mod-body" id="mb2">
+<div class="mod-head"><div class="mod-num">03</div><div class="mod-info"><div class="mod-title">Estrutura de Mercado</div><div class="mod-desc">O filtro número 1. Entenda o que o mercado está fazendo antes de qualquer entrada.</div><span class="mod-count">6 aulas</span></div></div>
+
+<div class="lesson" id="l11"><div class="l-top" onclick="tgl('l11')"><div class="l-num">12</div><div class="l-info"><div class="l-title">Tendência de alta</div><div class="l-meta">10 min · Aula 12</div></div><span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Uma tendência de alta é definida por uma sequência de topos mais altos (HH — Higher Highs) e fundos mais altos (HL — Higher Lows). O preço "escada" para cima.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Regra de ouro:</strong> em uptrend, só opere na COMPRA.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Melhor entrada:</strong> espere o pullback até o HL anterior e busque confirmação bullish para comprar.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Sinal de alerta:</strong> se um HL não se forma, a tendência pode estar enfraquecendo.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No gráfico H4 do EUR/USD, identifique a última sequência de HH e HL. Quantos topos e fundos crescentes você consegue contar?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l11')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l12"><div class="l-top" onclick="tgl('l12')"><div class="l-num">13</div><div class="l-info"><div class="l-title">Tendência de baixa</div><div class="l-meta">10 min · Aula 13</div></div><span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Tendência de baixa: sequência de topos mais baixos (LH) e fundos mais baixos (LL). O preço "escada" para baixo.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Regra:</strong> em downtrend, só opere na VENDA (short).</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Melhor entrada:</strong> espere o pullback até o LH anterior e busque confirmação bearish para vender.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>CFDs permitem:</strong> operar na queda facilmente. Você vende caro e compra barato depois.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Encontre um downtrend recente no XAUUSD no H1. Identifique pelo menos 3 LH e 3 LL. O downtrend ainda está ativo ou houve reversão?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l12')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l13"><div class="l-top" onclick="tgl('l13')"><div class="l-num">14</div><div class="l-info"><div class="l-title">Mercado lateral (range)</div><div class="l-meta">10 min · Aula 14</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Range: topos e fundos no mesmo nível. O preço fica "preso" entre suporte e resistência. Representa acumulação de liquidez antes de um grande movimento.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Como operar:</strong> compre perto do suporte, venda perto da resistência — com confirmação.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Atenção:</strong> mercado lateral pode sair para cima ou para baixo. O rompimento determina a próxima tendência.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Choppy market:</strong> quando o range é estreito e irregular, é melhor não operar.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No EUR/USD M30, identifique um range recente. Marque o suporte e a resistência. Para qual lado você apostaria no rompimento com base no contexto H4?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l13')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l14"><div class="l-top" onclick="tgl('l14')"><div class="l-num">15</div><div class="l-info"><div class="l-title">Topos e fundos — HH, HL, LH, LL</div><div class="l-meta">12 min · Aula 15</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>HH (Higher High):</strong> topo mais alto que o anterior. Força compradora continuando.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>HL (Higher Low):</strong> fundo mais alto. Compradores defendendo preços mais elevados.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>LH (Lower High):</strong> topo mais baixo. Compradores perdendo força — atenção.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>LL (Lower Low):</strong> fundo mais baixo. Vendedores no controle.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Pegue o XAUUSD H1 e marque os últimos 5 topos e 5 fundos. Classifique cada um como HH, HL, LH ou LL.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l14')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l15"><div class="l-top" onclick="tgl('l15')"><div class="l-num">16</div><div class="l-info"><div class="l-title">Break of Structure (BOS)</div><div class="l-meta">15 min · Aula 16</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">BOS ocorre quando o preço rompe um nível estrutural relevante. Confirma a continuação da tendência ou o início de uma nova.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>BOS bullish:</strong> preço rompe acima do HH anterior → uptrend confirmado. Buscar compra no próximo pullback.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>BOS bearish:</strong> preço rompe abaixo do LL anterior → downtrend confirmado.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Não entre NA quebra:</strong> espere o reteste (pullback) após o BOS.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Falso BOS (fakeout):</strong> o preço rompe mas volta imediatamente. Geralmente é caça de liquidez.</div></div></div>
+  <div class="l-section"><div class="tip-box"><div class="tip-label">Dica prática</div><div class="tip-text">Para confirmar o BOS, espere o fechamento da vela ACIMA (ou abaixo) do nível. Sombra ultrapassando não conta.</div></div>
+  <div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No XAUUSD H1, encontre o último BOS bullish. Onde teria sido a entrada ideal? Qual seria o SL e TP? Calcule o R:R.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l15')">Marcar como concluída</button></div>
+</div>
+
+<div class="lesson" id="l16"><div class="l-top" onclick="tgl('l16')"><div class="l-num">17</div><div class="l-info"><div class="l-title">Mudança de tendência (CHoCH)</div><div class="l-meta">12 min · Aula 17</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">CHoCH é o sinal de que uma tendência está mudando de direção. Em um uptrend, ocorre quando o preço rompe abaixo do último HL, e é seguido por um LL.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Uptrend → Downtrend:</strong> preço forma LL pela primeira vez. O BOS bearish confirma.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Downtrend → Uptrend:</strong> preço forma HH pela primeira vez após downtrend.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Paciência:</strong> não opere na suspeita de CHoCH. Aguarde o BOS confirmar a nova direção.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No histórico do XAUUSD H4, encontre um exemplo real de CHoCH. Identifique o ponto exato da mudança de estrutura.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l16')">Marcar como concluída</button></div>
+</div>
+</div>
+
+<!-- M4 -->
+<div class="mod-body" id="mb3">
+<div class="mod-head"><div class="mod-num">04</div><div class="mod-info"><div class="mod-title">Suporte e Resistência</div><div class="mod-desc">Onde o preço reage. A base de toda entrada inteligente.</div><span class="mod-count">5 aulas</span></div></div>
+<div class="lesson" id="l17"><div class="l-top" onclick="tgl('l17')"><div class="l-num">18</div><div class="l-info"><div class="l-title">O que são zonas de S&amp;R</div><div class="l-meta">8 min · Aula 18</div></div><span class="l-tag tag-ini">Iniciante</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Suporte é uma zona onde o preço parou de cair e subiu. Resistência é onde o preço parou de subir e caiu.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Zonas, não linhas:</strong> S/R são regiões de preço, não números exatos. Marque com retângulos.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Troca de papel:</strong> resistência quebrada vira suporte. Suporte quebrado vira resistência.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Quanto mais testes,</strong> mais fraco o nível fica.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No XAUUSD H1, marque os 3 suportes e 3 resistências mais claros das últimas 2 semanas. Use retângulos, não linhas.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l17')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l18"><div class="l-top" onclick="tgl('l18')"><div class="l-num">19</div><div class="l-info"><div class="l-title">Como marcar suporte corretamente</div><div class="l-meta">10 min · Aula 19</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Use o fechamento (close):</strong> o corpo da vela é mais importante que a sombra.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Olhe o TF maior:</strong> um suporte no H4 é muito mais forte que um suporte no M15.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Múltiplos toques:</strong> 2 ou mais reações na mesma zona confirmam o suporte.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Velocidade de saída:</strong> se o preço saiu rápido da zona, é um suporte de qualidade.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Identifique um suporte no EUR/USD H4 com pelo menos 2 toques. O preço está se aproximando agora? Qual seria sua entrada e stop?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l18')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l19"><div class="l-top" onclick="tgl('l19')"><div class="l-num">20</div><div class="l-info"><div class="l-title">Como marcar resistência corretamente</div><div class="l-meta">10 min · Aula 20</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Mesmos critérios do suporte,</strong> mas acima do preço atual.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Números psicológicos:</strong> 2000, 2100 no ouro — sempre atuam como resistência natural.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Máximas históricas:</strong> ATH é a resistência mais forte que existe.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Encontre a resistência mais próxima acima do preço atual do XAUUSD. Quantas vezes ela foi testada? Ela ainda é "fresca"?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l19')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l20"><div class="l-top" onclick="tgl('l20')"><div class="l-num">21</div><div class="l-info"><div class="l-title">Zonas fortes vs zonas fracas</div><div class="l-meta">12 min · Aula 21</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Zona forte:</strong> vem de TF alto (H4, D1), nunca retestada, movimento impulsivo de saída, coincide com número redondo.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Zona fraca:</strong> TF baixo, já testada várias vezes, sem movimento impulsivo, formada em range lateral.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Confluência:</strong> zona que coincide em múltiplos TFs tem força máxima.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Analise 3 zonas no XAUUSD e classifique cada uma como forte ou fraca com base nos critérios desta aula.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l20')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l21"><div class="l-top" onclick="tgl('l21')"><div class="l-num">22</div><div class="l-info"><div class="l-title">Confirmação de reação em zona</div><div class="l-meta">12 min · Aula 22</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Não entre antecipado:</strong> espere o preço CHEGAR na zona e mostrar reação.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Sinais de confirmação:</strong> Pin Bar, Engolfo, Morning Star na zona de suporte = entrada de compra.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Volume:</strong> aumento de volume na zona + vela de reversão = confirmação mais forte.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Encontre uma zona de suporte onde houve uma confirmação de reação recente. Qual foi o padrão de vela? O trade teria sido lucrativo?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l21')">Marcar como concluída</button></div>
+</div>
+</div>
+
+<!-- M5 -->
+<div class="mod-body" id="mb4">
+<div class="mod-head"><div class="mod-num">05</div><div class="mod-info"><div class="mod-title">Liquidez e Smart Money</div><div class="mod-desc">Entenda como os grandes players movem o mercado.</div><span class="mod-count">5 aulas</span></div></div>
+<div class="lesson" id="l22"><div class="l-top" onclick="tgl('l22')"><div class="l-num">23</div><div class="l-info"><div class="l-title">O que é liquidez</div><div class="l-meta">10 min · Aula 23</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Liquidez é a facilidade de executar ordens grandes sem mover o preço. Instituições precisam de contrapartes para entrar e sair de posições milionárias.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Onde está:</strong> acima de topos (stops de vendedores) e abaixo de fundos (stops de compradores).</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Números redondos:</strong> 1.2000, 2000, 3000 — concentram ordens e stops de traders de varejo.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Topos e fundos duplos:</strong> região de máxima concentração de liquidez — alvo favorito institucional.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No XAUUSD H1, identifique 2 zonas de liquidez acima e 2 abaixo do preço. Para onde o preço vai "caçar" primeiro?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l22')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l23"><div class="l-top" onclick="tgl('l23')"><div class="l-num">24</div><div class="l-info"><div class="l-title">Caça de stops (Stop Hunt)</div><div class="l-meta">12 min · Aula 24</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>O que é:</strong> instituições movem o preço até uma zona de stops, executam as ordens e depois invertem na direção real.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Padrão típico:</strong> range → falso rompimento abaixo do suporte → reversão rápida para cima.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Como se proteger:</strong> coloque stops além das zonas óbvias, com margem de 5-10 pips extra.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No histórico do EUR/USD M15, encontre um exemplo de stop hunt. Como você teria posicionado o stop para sobreviver?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l23')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l24"><div class="l-top" onclick="tgl('l24')"><div class="l-num">25</div><div class="l-info"><div class="l-title">Como instituições operam</div><div class="l-meta">15 min · Aula 25</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Acumulação:</strong> compras graduais em suporte. Preço lateral.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Manipulação:</strong> falso rompimento para baixo, captura stops, depois subida forte.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Distribuição:</strong> venda gradual no topo enquanto varejo compra eufórico.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Ciclo:</strong> acumulação → markup → distribuição → markdown → nova acumulação.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Pesquise "Wyckoff Method". Compare com o que aprendeu nesta aula sobre o ciclo de acumulação/distribuição.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l24')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l25"><div class="l-top" onclick="tgl('l25')"><div class="l-num">26</div><div class="l-info"><div class="l-title">Zonas de interesse (POI)</div><div class="l-meta">12 min · Aula 26</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">POI (Point of Interest) são zonas onde ordens institucionais provavelmente ficaram pendentes — as origens dos grandes movimentos impulsivos.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Identificação:</strong> onde começou o último grande movimento impulsivo? Essa origem é o POI.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Entrada:</strong> quando o preço retorna ao POI, pode haver nova reação institucional.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Zona fresca:</strong> POI que nunca foi retestado tem mais ordens pendentes — mais poderoso.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No XAUUSD H4, identifique o último impulso forte de alta. Onde ele começou? Marque essa zona como POI.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l25')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l26"><div class="l-top" onclick="tgl('l26')"><div class="l-num">27</div><div class="l-info"><div class="l-title">Evitar armadilhas do mercado</div><div class="l-meta">10 min · Aula 27</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Nunca coloque SL em locais óbvios:</strong> no número redondo, no topo exato. Vai ser caçado.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Desconfie de rompimentos sem volume:</strong> pode ser fakeout/stop hunt antes da reversão.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Movimentos rápidos e extremos</strong> antes de notícias geralmente são manipulação.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Correlação:</strong> se DXY (dólar) sobe forte, XAUUSD tende a cair. Verifique o contexto macro.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Nas próximas 3 operações na demo, posicione seu SL 5-10 pips além da zona óbvia. Compare com resultados anteriores.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l26')">Marcar como concluída</button></div>
+</div>
+</div>
+
+<!-- M6 -->
+<div class="mod-body" id="mb5">
+<div class="mod-head"><div class="mod-num">06</div><div class="mod-info"><div class="mod-title">Estratégias de Entrada</div><div class="mod-desc">Técnicas concretas para entrar com lógica e precisão.</div><span class="mod-count">6 aulas</span></div></div>
+<div class="lesson" id="l27"><div class="l-top" onclick="tgl('l27')"><div class="l-num">28</div><div class="l-info"><div class="l-title">O que é uma entrada de qualidade</div><div class="l-meta">8 min · Aula 28</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Contexto macro:</strong> tendência do H4/D1 alinhada com sua entrada.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Zona relevante:</strong> entrada em S/R, zona de demanda/oferta ou POI.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Confirmação:</strong> padrão de vela ou BOS no TF menor confirma a direção.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>R:R favorável:</strong> risco/retorno mínimo de 1:2 antes de entrar.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>SL definido:</strong> sabe exatamente onde está errado antes de entrar.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Para o próximo trade que considerar, responda: tenho contexto? Zona relevante? Confirmação? R:R bom? SL definido? Se qualquer resposta for "não", não entre.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l27')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l28"><div class="l-top" onclick="tgl('l28')"><div class="l-num">29</div><div class="l-info"><div class="l-title">Estratégia de pullback</div><div class="l-meta">15 min · Aula 29</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Pullback é a retração temporária na direção contrária à tendência. É o melhor momento de entrada — risco reduzido, potencial alto.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Setup completo:</strong> BOS confirma → aguarda pullback → vela de confirmação na zona → entrada → SL abaixo da zona → TP na próxima resistência.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Profundidade:</strong> retração de 38-61% do movimento anterior é considerada saudável.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Invalidade:</strong> se o pullback romper o ponto de origem do impulso, o setup é cancelado.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Execute 5 trades de pullback na conta demo usando o setup completo. Registre cada um com print, entrada, SL, TP e resultado.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l28')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l29"><div class="l-top" onclick="tgl('l29')"><div class="l-num">30</div><div class="l-info"><div class="l-title">Confirmação com candles</div><div class="l-meta">12 min · Aula 30</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Engolfo bullish na zona:</strong> vela verde grande engolfa a vermelha anterior em suporte = confirmação de compra.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Pin Bar bullish:</strong> sombra inferior longa com corpo pequeno em suporte = rejeição de preço baixo.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Morning Star em suporte:</strong> 3 velas de reversão = confirmação forte de compra.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Regra de entrada:</strong> entre na abertura da vela seguinte à confirmação.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Nos últimos 30 dias do XAUUSD H1, identifique 5 confirmações de entrada válidas. Quantas teriam dado resultado positivo com R:R 1:2?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l29')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l30"><div class="l-top" onclick="tgl('l30')"><div class="l-num">31</div><div class="l-info"><div class="l-title">EMA 9, 21 e 200</div><div class="l-meta">12 min · Aula 31</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>EMA 9:</strong> momentum de curtíssimo prazo. Preço acima = micro-tendência de alta.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>EMA 21:</strong> suporte/resistência dinâmica. Pullback até a EMA 21 em tendência de alta = zona de entrada.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>EMA 200:</strong> filtro macro. Acima = bull market, abaixo = bear market. Nunca opere contra ela.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Cruzamento:</strong> EMA 9 cruzando acima da EMA 21 = sinal de compra. Abaixo = sinal de venda.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Adicione EMA 9, 21 e 200 no XAUUSD H1. O preço está acima ou abaixo da EMA 200? As EMAs 9 e 21 estão alinhadas com a tendência H4?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l30')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l31"><div class="l-top" onclick="tgl('l31')"><div class="l-num">32</div><div class="l-info"><div class="l-title">Entrada sniper (alta precisão)</div><div class="l-meta">15 min · Aula 32</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Entrada sniper combina múltiplos fatores de confluência para criar uma entrada de altíssima probabilidade com stop mínimo.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Checklist sniper:</strong> tendência D1 alinhada + zona H4/H1 relevante + BOS no M15 + confirmação M5 + R:R mínimo 1:3.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Top-down completo:</strong> D1 → H4 → H1 → M15 → M5 para executar.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Paciência:</strong> entradas sniper acontecem 1-3 vezes por semana, não todos os dias.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Monitore o XAUUSD por 5 dias. Anote apenas as oportunidades que passam no checklist sniper completo.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l31')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l32"><div class="l-top" onclick="tgl('l32')"><div class="l-num">33</div><div class="l-info"><div class="l-title">Montando sua estratégia pessoal</div><div class="l-meta">20 min · Aula 33</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Uma estratégia pessoal é um conjunto de regras claras que você segue em 100% das operações. Sem regras = sem consistência.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Ativo:</strong> escolha 1-2 ativos para focar profundamente.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Timeframe:</strong> defina o TF de análise e execução. Ex: análise H1, execução M5.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Setup:</strong> descreva exatamente qual padrão você vai operar.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Gestão:</strong> risco por trade (%), onde entra, onde sai com lucro, onde sai com prejuízo.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Horários:</strong> defina quando operar e quando não operar.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Escreva sua estratégia pessoal em 1 página. Inclua: ativo, TF, setup, gestão e horários.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l32')">Marcar como concluída</button></div>
+</div>
+</div>
+
+<!-- M7 -->
+<div class="mod-body" id="mb6">
+<div class="mod-head"><div class="mod-num">07</div><div class="mod-info"><div class="mod-title">Gestão de Risco</div><div class="mod-desc">O que separa quem sobrevive de quem quebra.</div><span class="mod-count">4 aulas</span></div></div>
+<div class="lesson" id="l33"><div class="l-top" onclick="tgl('l33')"><div class="l-num">34</div><div class="l-info"><div class="l-title">Stop Loss — por que é obrigatório</div><div class="l-meta">10 min · Aula 34</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Sem SL = roleta:</strong> uma operação sem stop pode transformar uma perda de 1% em -50% de conta.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Onde colocar:</strong> abaixo do fundo estrutural (compra), acima do topo estrutural (venda). Com margem de 5-10 pips.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Nunca mova o SL contra você:</strong> isso é a principal causa de perdas catastróficas.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Breakeven:</strong> quando o preço se mover 50% ao TP, mova o SL para o ponto de entrada.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Comprometa-se: "Em nenhuma operação vou entrar sem stop loss definido." Escreva isso no seu diário de trading como regra inquebrável.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l33')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l34"><div class="l-top" onclick="tgl('l34')"><div class="l-num">35</div><div class="l-info"><div class="l-title">Take Profit — realizando lucros</div><div class="l-meta">10 min · Aula 35</div></div><span class="l-tag tag-med">Intermediário</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Defina antes de entrar:</strong> o TP deve ser determinado ANTES da entrada.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Onde colocar:</strong> na próxima resistência relevante (compra) ou suporte (venda).</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Parciais:</strong> feche 50% da posição no primeiro alvo, deixe o restante correr com trailing stop.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Trailing Stop:</strong> stop que acompanha o preço. Protege lucros enquanto o movimento continua.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Nas próximas 5 operações demo, feche 50% no primeiro alvo e deixe 50% com trailing stop. Compare o resultado.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l34')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l35"><div class="l-top" onclick="tgl('l35')"><div class="l-num">36</div><div class="l-info"><div class="l-title">Risco por operação (% da conta)</div><div class="l-meta">12 min · Aula 36</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Regra dos 1-2%:</strong> nunca arrisque mais de 2% do saldo em uma única operação.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Cálculo:</strong> conta $1000 + 1% = $10 máximo por trade. Ajuste o lote para isso.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>10 perdas seguidas com 1%:</strong> você ainda tem 90% da conta. Com 10%, restam apenas 35%.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Alavancagem:</strong> use para ajustar o tamanho da posição ao risco — nunca para apostar maior.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Com sua conta atual, qual é o valor máximo que pode arriscar por trade (1%)? Qual tamanho de lote isso representa no XAUUSD com SL de 20 pips?</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l35')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l36"><div class="l-top" onclick="tgl('l36')"><div class="l-num">37</div><div class="l-info"><div class="l-title">Relação risco/retorno (R:R)</div><div class="l-meta">10 min · Aula 37</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>R:R 1:2:</strong> arrisca $1 para ganhar $2. Com apenas 40% de acerto, você ainda é lucrativo.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Matemática:</strong> 10 trades: 4 ganhos × $2 = $8. 6 perdas × $1 = -$6. Resultado: +$2.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Mínimo aceitável:</strong> nunca entre em operações com R:R menor que 1:1.5.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>R:R 1:3+:</strong> mesmo com 30% de acerto você lucra. Setups sniper permitem R:R elevado.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Calcule: 20 trades com R:R 1:2 e 45% de acerto — qual seria o resultado final? E com 35%? O R:R é mais importante que a taxa de acerto.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l36')">Marcar como concluída</button></div>
+</div>
+</div>
+
+<!-- M8 -->
+<div class="mod-body" id="mb7">
+<div class="mod-head"><div class="mod-num">08</div><div class="mod-info"><div class="mod-title">Psicologia do Trader</div><div class="mod-desc">A maioria falha aqui. Disciplina é mais importante que estratégia.</div><span class="mod-count">3 aulas</span></div></div>
+<div class="lesson" id="l37"><div class="l-top" onclick="tgl('l37')"><div class="l-num">38</div><div class="l-info"><div class="l-title">Emoções no trading</div><div class="l-meta">12 min · Aula 38</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>FOMO:</strong> entrar por medo de perder oportunidade. Resultado: entrada no pior momento.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Revenge Trading:</strong> após perda, aumentar posições para "recuperar". Causa direta de quebra de conta.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Overconfidence:</strong> após série de ganhos, aumentar risco desnecessariamente.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Paralisia:</strong> tanto medo de perder que não entra em nenhum setup, mesmo os bons.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Qual dessas emoções mais te afeta? Escreva um plano específico para lidar com ela da próxima vez que aparecer.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l37')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l38"><div class="l-top" onclick="tgl('l38')"><div class="l-num">39</div><div class="l-info"><div class="l-title">Disciplina e consistência</div><div class="l-meta">15 min · Aula 39</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Plano de trading:</strong> defina antes do dia começar — ativos, horários, setups aceitos, perda máxima diária.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Regra dos 3:</strong> 3 perdas consecutivas no dia = pare. Volte amanhã com a cabeça limpa.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Diário de operações:</strong> registre print, entrada, saída, motivo, resultado e emoção.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Não existe atalho:</strong> consistência leva meses a anos. Qualquer promessa de resultado rápido é mentira.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Crie seu plano de trading pessoal para a semana. Defina: ativos, horários, setup único, perda máxima diária e semanal. Siga por 5 dias na demo.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l38')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l39"><div class="l-top" onclick="tgl('l39')"><div class="l-num">40</div><div class="l-info"><div class="l-title">Erros psicológicos comuns</div><div class="l-meta">12 min · Aula 40</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Mover o stop:</strong> "o preço vai voltar" — a frase que destruiu mais contas na história do trading.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Fechar cedo demais:</strong> sair antes do TP por medo. Sabota a matemática do R:R.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Comparar-se:</strong> ver outros ganhando e aumentar o risco para "igualar".</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Operar por necessidade:</strong> precisar do dinheiro cria pressão emocional que destrói a tomada de decisão.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Por 1 semana na demo, não mova o SL para pior e não feche antes do TP ou SL. Apenas execute e aguarde. Observe o impacto nos resultados.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l39')">Marcar como concluída</button></div>
+</div>
+</div>
+
+<!-- M9 -->
+<div class="mod-body" id="mb8">
+<div class="mod-head"><div class="mod-num">09</div><div class="mod-info"><div class="mod-title">Prática Real (Extra)</div><div class="mod-desc">Coloque tudo junto. Análise real, simulações e revisão de operações.</div><span class="mod-count">3 aulas</span></div></div>
+<div class="lesson" id="l40"><div class="l-top" onclick="tgl('l40')"><div class="l-num">41</div><div class="l-info"><div class="l-title">Análise de gráficos reais</div><div class="l-meta">20 min · Aula 41</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Esta aula é 100% prática. Você vai analisar 3 ativos (XAUUSD, EUR/USD, US30) usando todos os conceitos do curso em sequência.</div></div>
+  <div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Template completo:</strong> Tendência D1 → H4 → Zona H1 → Setup M15 → Confirmação M5 → R:R → Decisão.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Anote tudo:</strong> mesmo que não entre, registrar a análise desenvolve o olho clínico.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Revisão:</strong> 24h depois, veja o que o mercado fez. Acertou a direção?</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">Faça a análise completa dos 3 ativos agora. Registre com prints e previsão de direção. Compare com a realidade em 24h. Repita por 2 semanas sem operar.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l40')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l41"><div class="l-top" onclick="tgl('l41')"><div class="l-num">42</div><div class="l-info"><div class="l-title">Simulações e entradas comentadas</div><div class="l-meta">30 min · Aula 42</div></div><span class="l-tag tag-adv">Avançado</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="kp"><div class="kp-dot"></div><div><strong>Backtesting manual:</strong> use o TradingView. Cubra o lado direito e analise como se fosse ao vivo.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Meta:</strong> 100 operações históricas com sua estratégia antes de operar ao vivo. Isso valida o setup.</div></div><div class="kp"><div class="kp-dot"></div><div><strong>Conta demo viva:</strong> após o backtest, opere 30 dias em demo com disciplina total.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Mini desafio</div><div class="ch-text">No TradingView, faça o backtesting de 20 operações do seu setup favorito no XAUUSD H1. Registre taxa de acerto, R:R médio e drawdown máximo.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l41')">Marcar como concluída</button></div>
+</div>
+<div class="lesson" id="l42"><div class="l-top" onclick="tgl('l42')"><div class="l-num">43</div><div class="l-info"><div class="l-title">Revisão e próximos passos</div><div class="l-meta">20 min · Aula 43</div></div><span class="l-tag tag-crit">Crítico</span><span class="l-arr">▼</span></div>
+  <div class="l-body"><div class="l-section"><div class="l-text">Parabéns por chegar ao final do curso. Agora é hora de consolidar e definir o caminho daqui para frente.</div></div>
+  <div class="l-section"><div class="sec-label">Roteiro de evolução</div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Fase 1 — Educação (meses 1-2):</strong> dominar todos os conceitos do curso. Sem dinheiro real.</div></div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Fase 2 — Demo (meses 3-5):</strong> aplicar a estratégia com disciplina. Meta: 3 meses consecutivos positivos.</div></div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Fase 3 — Real pequeno (mês 6+):</strong> começar com $100-500 e risco de 0.5% por trade.</div></div>
+  <div class="kp"><div class="kp-dot"></div><div><strong>Fase 4 — Escala:</strong> só após 6+ meses consistentes com dinheiro real. Nunca antes.</div></div></div>
+  <div class="l-section"><div class="challenge"><div class="ch-label">Desafio final</div><div class="ch-text">Escreva seu plano de evolução pessoal com metas mensais para os próximos 6 meses. Foque em aprender — o lucro é consequência da competência.</div></div></div>
+  <button class="mark-done-btn" onclick="markDone('l42')">Marcar como concluída</button></div>
+</div>
+</div>
+
+</div>
+
+<script>
+var TOTAL=43;
+function sw(i){
+  var bs=document.querySelectorAll('.mod-body');
+  var ts=document.querySelectorAll('.mtab');
+  for(var j=0;j<bs.length;j++){bs[j].classList.remove('on');ts[j].classList.remove('on')}
+  bs[i].classList.add('on');ts[i].classList.add('on');
+  var tab=ts[i];
+  var nav=document.getElementById('mod-tabs');
+  if(nav&&tab){
+    var left=tab.offsetLeft-(nav.offsetWidth/2)+(tab.offsetWidth/2);
+    nav.scrollTo({left:Math.max(0,left),behavior:'smooth'});
+  }
+}
+function tgl(id){
+  var el=document.getElementById(id);
+  var open=el.classList.contains('open');
+  document.querySelectorAll('.lesson.open').forEach(function(l){l.classList.remove('open')});
+  if(!open)el.classList.add('open');
+}
+function markDone(id){
+  var el=document.getElementById(id);
+  if(el.classList.contains('done'))return;
+  el.classList.remove('open');
+  el.classList.add('done');
+  var btn=el.querySelector('.mark-done-btn');
+  if(btn){btn.textContent='Concluída ✓';btn.disabled=true;}
+  var num=el.querySelector('.l-num');
+  if(num){num.textContent='✓';}
+  updateProgress();
+  el.style.order='-1';
+}
+function updateProgress(){
+  var done=document.querySelectorAll('.lesson.done').length;
+  var pct=Math.round((done/TOTAL)*100);
+  document.getElementById('done-count').textContent=done;
+  document.getElementById('pct-count').textContent=pct+'%';
+  document.getElementById('pb').style.width=pct+'%';
+}
+</script>
+</body>
+</html>
